@@ -2,7 +2,7 @@
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon-192.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -23,6 +23,8 @@
       font-family: Tahoma, Arial, sans-serif;
       color: #e9d5ff;
       user-select: none;
+      -webkit-user-select: none;
+      overscroll-behavior: none;
       transition: background 0.6s ease;
     }
 
@@ -59,6 +61,12 @@
       cursor: none;
       box-shadow: 0 8px 32px rgba(168, 85, 247, 0.4);
       transition: border-color 0.6s ease, box-shadow 0.6s ease;
+      max-width: 95vw;
+      height: auto;
+      touch-action: none;
+      -ms-touch-action: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
     }
 
     .hint {
@@ -522,17 +530,40 @@
       keys[e.key] = false;
     });
 
+    function movePaddleToClientX(clientX) {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = W / rect.width;
+      const canvasX = (clientX - rect.left) * scaleX;
+      paddle.x = Math.max(0, Math.min(W - paddle.w, canvasX - paddle.w / 2));
+    }
+
     canvas.addEventListener('mousemove', e => {
       unlockAudio();
-      const rect = canvas.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
-      paddle.x = Math.max(0, Math.min(W - paddle.w, mouseX - paddle.w / 2));
+      movePaddleToClientX(e.clientX);
     });
 
     canvas.addEventListener('click', () => {
       unlockAudio();
       tryRestart();
     });
+
+    function handleTouch(e) {
+      unlockAudio();
+      if (e.cancelable) e.preventDefault();
+      const touch = e.touches[0] || e.changedTouches[0];
+      if (touch) movePaddleToClientX(touch.clientX);
+    }
+
+    canvas.addEventListener('touchstart', e => {
+      handleTouch(e);
+      if (gameOver) tryRestart();
+    }, { passive: false });
+
+    canvas.addEventListener('touchmove', handleTouch, { passive: false });
+
+    canvas.addEventListener('touchend', e => {
+      if (e.cancelable) e.preventDefault();
+    }, { passive: false });
 
     ballSlots = [createBall(0)];
     applyTheme(0);
