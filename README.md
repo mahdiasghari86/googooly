@@ -1,3 +1,3 @@
-Only open deployments and the click on the link then add this site to your home screen and enjoy playing:)
+Only open deployments and click on the link then add this site to your home screen and enjoy playing:)
 or
 open this link: https://mahdiasghari86.github.io/googooly/
